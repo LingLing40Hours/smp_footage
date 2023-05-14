@@ -1,5 +1,7 @@
 #include <iostream>
-#include  "cursor.h"
+#include "cursor.h"
+#include "text.h"
+#include "utf8.h"
 
 
 int digitCount(int n) {
@@ -12,16 +14,38 @@ int digitCount(int n) {
     return ans;
 }
 
-void printMessage(std::string message, int &cursorRow, int &cursorCol, int x, int y) {
+//cout is much slower than string construction; avoid single-char prints if possible
+void printAnimationChar(int beat, int &cursorRow, int &cursorCol, int x, int y) {
+    unsigned int beatIndex = (unsigned)beat%4;
+    char c = animationLOGO[beatIndex];
+    printChar(c, cursorRow, cursorCol, x, y);
+}
+
+void printChar(char c, int &cursorRow, int &cursorCol, int x, int y) {
+    moveCursor(cursorRow, cursorCol, x, y);
+    std::cout << c;
+    ++cursorCol;
+}
+
+//for debugging; single-line only, doesn't change cursor position
+void showMessage(std::string message, int &cursorRow, int &cursorCol, int x, int y) {
     int row = cursorRow;
     int col = cursorCol;
     moveCursor(cursorRow, cursorCol, x, y);
     std::cout << message << std::flush;
 
-    cursorCol += message.length();
+    cursorCol += lengthU8(message);
     moveCursor(cursorRow, cursorCol, col, row);
 }
 
+void printMessage(std::string message, int &cursorRow, int &cursorCol, int x, int y, int dx, int dy) {
+    moveCursor(cursorRow, cursorCol, x, y);
+    std::cout << message;
+    cursorRow += dy;
+    cursorCol += dx;
+}
+
+//print cursor position for debugging
 void printCursor(int &cursorRow, int &cursorCol, int x, int y) {
     int row = cursorRow;
     int col = cursorCol;

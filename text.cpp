@@ -12,7 +12,13 @@
 //|___
 std::string executing = " *  Executing task: /bin/bash -c ./build/Debug/outDebug";
 std::string animationLOGO = "|/-\\";
-std::string waveChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ`~1!2@3#4$5%6^7&8*9(0)-_=+[{]}\\|;:'\",<.>/?`¡™£¢∞§¶•ªº–≠œ∑´®†¥¨ˆøπ“‘«åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷";
+std::string waveChars = "゜つロabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ`~1!2@3#4$5%6^7&8*9(0)-_=+[{]}\\|;:'\",<.>/?¡™£¢∞§¶•ªº–≠œ∑´®†¥¨ˆøπ“‘«åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷";
+std::string bbgb = "( ゜- ゜)つロ"; //゜つロ
+std::vector<std::string> smp;
+std::vector<std::string> lyrics;
+std::vector<std::string> waves;
+std::vector<int> waveWidths;
+std::vector<int> waveLengths;
 std::vector<std::string> animationWaves = {
     u8"||||||||||||////||*π~!∆#®!)Ø+_||\\\\\\\\||||||||||||",
     u8"||||||||||||////||);>ßn«∫¬ˆ%^#||\\\\\\\\||||||||||||",
@@ -49,7 +55,8 @@ char PVZ[5][19] = {
 };
 std::string frameSMP = "";
 std::string framePVZ = "";
-std::string frameWave = u8"";
+std::string frameWave = "";
+std::vector<std::vector<std::string>> frameLowTide;
 std::vector<std::vector<std::string>> ALPHABET5;
 
 std::vector<std::string> A5 = {

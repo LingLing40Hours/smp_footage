@@ -9,7 +9,10 @@ enum ClearCodes {
 
 //positions must be non-negative
 int digitCount(int n);
-void printMessage(std::string message, int &cursorRow, int &cursorCol, int x, int y);
+void printAnimationChar(int beat, int &cursorRow, int &cursorCol, int x, int y);
+void printChar(char c, int &cursorRow, int &cursorCol, int x, int y);
+void showMessage(std::string message, int &cursorRow, int &cursorCol, int x, int y);
+void printMessage(std::string message, int &cursorRow, int &cursorCol, int x, int y, int dx, int dy);
 void printCursor(int &cursorRow, int &cursorCol, int x, int y);
 void moveCursor(int &cursorRow, int &cursorCol, int x, int y);
 void moveUp(int positions);

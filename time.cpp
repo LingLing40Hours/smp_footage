@@ -52,9 +52,13 @@ std::vector<std::vector<unsigned int>> timings = {
         512
     },
     { //48m instructions (768)
+        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
         2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
         2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 642
+        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+        510
     },
     { //9m outro
         144
@@ -85,10 +89,16 @@ void wait8ths(unsigned int e, long offset) {
     while (std::chrono::steady_clock::now() < end);
 }
 
-void wait16ths(unsigned int n, long offset) {
-    //std::this_thread::sleep_for(std::chrono::nanoseconds(n*NSPS));
+void wait16ths(unsigned int s, long offset) {
+    //std::this_thread::sleep_for(std::chrono::nanoseconds(s*NSPS));
     auto start = std::chrono::steady_clock::now();
-    auto end = start + std::chrono::nanoseconds(n*NSPS - offset);
+    auto end = start + std::chrono::nanoseconds(s*NSPS - offset);
+    while (std::chrono::steady_clock::now() < end);
+}
+
+void wait32nds(unsigned int t, long offset) {
+    auto start = std::chrono::steady_clock::now();
+    auto end = start + std::chrono::nanoseconds(t*NSPT - offset);
     while (std::chrono::steady_clock::now() < end);
 }
 

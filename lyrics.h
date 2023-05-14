@@ -12,7 +12,7 @@ std::vector<std::string> lyricsAll = {
     "\nI", " am", " the", " most", " de", "fi", "ni", "tive", " source", " for", " all", " your",
     "%I", " I", " am", " the", " source", " monitor", " plus",
     "\nI", " am", " the", " source", " monitor", " plus",
-    "\nI", " am", " the", " source", " for", " all", " the", " jour", "nal", " ref", "eren", "ces", " you", " cite",
+    "\nI", " am", " the", " source", " for", " all", " the", " jour", "nal", " ar", "ti", "cles", " you", " cite",
     "\nI", " am", " the", " source", " monitor", " plus",
     "\nI", " am", " the", " source", " monitor", " plus",
     "\nI", " am", " the", " most", " de", "fi", "ni", "tive", " source", " for", " all", " your",
@@ -50,17 +50,22 @@ std::vector<std::string> lyricsAll = {
     "\nIt", " is", " the", " source", " of", " hope",
     "\nIt", " is", " the", " source", " of", " light",
     "\nTo", " use", " it", " all", " you", " have", " to", " do", " is", " to",
-    "\nAll", " you", " have", " to", " do", " is", " to",
+    "\nAll", " you", " have", " to", " turn", " to", " is",
     "\nAll", " you", " have", " to", " do", " is", " turn", " to",
     //instructions
     "\nFirst,", " create", " a", " new", " .smp", " file,", " paste", " in", " the", " example", " code", " provided", " in",
     "\nsource", "_monitor", "_plus/", "source/", "src,", " and", " save", " it", " to", " your", " source", "_monitor", "_plus/",
     "\nW:/", " drive.", " Next,", " ensuring", " the", " build", " configuration", " is", " set", " to", " 'export", " as",
-    "\nwav',", " click", " the", " compile", " icon", " (located", " 3rd", " from", " left", " in", " the", " toolbar).",
-    "\nNext,", " run", " your", " compiled", " program", " using", " Valgrind", " to", " remove", " any", " peaks", " over",
-    "\n0dB.",
+    "\nwav',", " click", " the", " compile", " icon", " (located", " 3rd", " from", " 2nd", " from", " right", " from", " left",
+    "\nin", " the", " toolbar).", " If", " you", " encounter", " a", " \"Backup", " failed", " -", " hardware",
+    "\ntemperature", " critical\"", " error,", " take", " a", " nap", " and", " retry", " step", " two", " when", " you",
+    "\nstart", " to", " dream", " about", " juggling", " walnut(s)", " at", " exactly", " 128npm.", " You", " need", " not",
+    "\nbe", " awake", " when", " performing", " this", " fix.", " Next,", " ensuring", " you", " \e[3mare\e[0m", " awake,", " run",
+    "\nyour", " compiled", " program", " using", " Valgrind", " to", " remove", " any", " peaks", " over", " 0dB.",
+    "\nFinally,", " head", " to", " https://youtu.be/0BTVcEdnXnE,", " wait", " 426s,", " then", " click",
+    "\nlike", " and", " subscribe.", " You", " have", " made", " use", " of", " the", " source", " monitor", " plus.",
     //verse
-    "\nI", " am", " the", " source", " monitor", " plus",
+    "I", " am", " the", " source", " monitor", " plus",
     "\nI", " am", " the", " source", " monitor", " plus",
     "\nI", " am", " the", " one", " and", " on", "ly", " re", "source", " for", " all", " your",
     "%I", " I", " am", " the", " source", " monitor", " plus",
@@ -91,8 +96,7 @@ std::vector<std::string> lyricsAll = {
     //bridge3
     "\nSay", " no", " to", " blood", " and", " meat",
     "\nSay", " yes", " to", " flash", " me", "mo", "ry",
-    "\nIt", " is", " ex", "is", "tence", " on", " a", " le", "vel", " clo", "ser", " to", " me",
-    "\nFor", " you", " to", " be",
+    "\nIt", " is", " ex", "is", "tence", " on", " a", " le", "vel", " clo", "ser", " to", " me", " for", " you", " to", " be",
     "\nSay", " no", " to", " food", " and", " sleep",
     "\nSay", " yes", " to", " source", " en", "er", "gy",
     "\nIt", " is", " the",
@@ -105,7 +109,5 @@ std::vector<std::string> lyricsAll = {
     //chorus
     //outro
 };
-
-std::vector<std::string> lyrics;
 
 #endif
