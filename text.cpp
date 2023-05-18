@@ -17,6 +17,7 @@ std::string bbgb = "( ゜- ゜)つロ"; //゜つロ
 std::vector<std::string> smp;
 std::vector<std::string> lyrics;
 std::vector<std::string> waves;
+std::vector<std::string> stars;
 std::vector<int> waveWidths;
 std::vector<int> waveLengths;
 std::vector<std::string> animationWaves = {

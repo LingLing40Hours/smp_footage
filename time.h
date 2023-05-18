@@ -8,6 +8,7 @@ enum Timing {
     INTRO=0,
     VERSE,
     VERSE2,
+    PAUSE,
     BRIDGE,
     BRIDGE2,
     BRIDGE3,

@@ -13,6 +13,7 @@ extern std::string bbgb;
 extern std::vector<std::string> smp;
 extern std::vector<std::string> lyrics;
 extern std::vector<std::string> waves;
+extern std::vector<std::string> stars;
 extern std::vector<int> waveWidths;
 extern std::vector<int> waveLengths;
 extern std::vector<std::string> animationWaves;

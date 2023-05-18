@@ -59,10 +59,10 @@ std::vector<std::string> lyricsAll = {
     "\nwav',", " click", " the", " compile", " icon", " (located", " 3rd", " from", " 2nd", " from", " right", " from", " left",
     "\nin", " the", " toolbar).", " If", " you", " encounter", " a", " \"Backup", " failed", " -", " hardware",
     "\ntemperature", " critical\"", " error,", " take", " a", " nap", " and", " retry", " step", " two", " when", " you",
-    "\nstart", " to", " dream", " about", " juggling", " walnut(s)", " at", " exactly", " 128npm.", " You", " need", " not",
+    "\nstart", " to", " dream", " about", " juggling", " walnut", "(s)", " at", " exactly", " 128", "n", "p", "m.", " You", " need", " not",
     "\nbe", " awake", " when", " performing", " this", " fix.", " Next,", " ensuring", " you", " \e[3mare\e[0m", " awake,", " run",
-    "\nyour", " compiled", " program", " using", " Valgrind", " to", " remove", " any", " peaks", " over", " 0dB.",
-    "\nFinally,", " head", " to", " https://youtu.be/0BTVcEdnXnE,", " wait", " 426s,", " then", " click",
+    "\nyour", " compiled", " program", " using", " Valgrind", " to", " remove", " any", " peaks", " over", " 0", "dB.",
+    "\nFinally,", " head", " to", " https://youtu.be/0BTVcEdnXnE,", " wait", " 426", "s,", " then", " click",
     "\nlike", " and", " subscribe.", " You", " have", " made", " use", " of", " the", " source", " monitor", " plus.",
     //verse
     "I", " am", " the", " source", " monitor", " plus",

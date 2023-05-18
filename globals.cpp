@@ -19,3 +19,5 @@ int SMP_M1;
 int LAST_BAR_M0;
 int REVERT_PER_THIRTYSECOND;
 int WAVE_LENGTH;
+std::vector<int> kickRevertCounts = {3, 3, 4, 5, 6, 7, 8, 10};
+std::vector<std::vector<bool>> reverted;

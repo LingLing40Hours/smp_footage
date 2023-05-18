@@ -1,17 +1,15 @@
 #include <iostream>
-#include "cursor.h"
+#include "globals.h"
 #include "text.h"
 #include "utf8.h"
+#include "smath.h"
+#include "cursor.h"
 
 
-int digitCount(int n) {
-    int ans = 1;
-    n = abs(n);
-    while (n >= 10) {
-        n /= 10;
-        ++ans;
-    }
-    return ans;
+void printSMPExecutingChar(int beat, int charIndex, int &cursorRow, int &cursorCol) {
+    int row = charIndex/SMP_WIDTH;
+    int col = charIndex - row*SMP_WIDTH;
+    printAnimationChar(beat, cursorRow, cursorCol, col+NTE_WIDTH, row+LYRIC_HEIGHT);
 }
 
 //cout is much slower than string construction; avoid single-char prints if possible

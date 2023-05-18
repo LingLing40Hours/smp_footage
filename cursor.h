@@ -8,7 +8,7 @@ enum ClearCodes {
 };
 
 //positions must be non-negative
-int digitCount(int n);
+void printSMPExecutingChar(int beat, int charIndex, int &cursorRow, int &cursorCol);
 void printAnimationChar(int beat, int &cursorRow, int &cursorCol, int x, int y);
 void printChar(char c, int &cursorRow, int &cursorCol, int x, int y);
 void showMessage(std::string message, int &cursorRow, int &cursorCol, int x, int y);

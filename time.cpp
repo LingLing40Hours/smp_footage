@@ -24,6 +24,9 @@ std::vector<std::vector<unsigned int>> timings = {
         4, 4, 2, 3, 3,
         5, 4, 1, 2, 2, 2, 2, 2, 2, 2, 2, 4, 4
     },
+    { //1m pause
+        16
+    },
     { //8m bridge
         2, 2, 2, 2, 3, 3,
         4, 2, 2, 2, 3, 3,
@@ -53,19 +56,19 @@ std::vector<std::vector<unsigned int>> timings = {
     },
     { //48m instructions (768)
         2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
         2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
         2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-        510
+        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+        2, 2, 2, 498
     },
     { //9m outro
         144
     }
 };
 
-std::vector<Timing> song = {INTRO, VERSE, VERSE, BRIDGE, CHORUS, VERSE, VERSE2, BRIDGE2, INSTRUCTIONS, VERSE, INTRO, VERSE, VERSE, VERSE, BRIDGE3, CHORUS, OUTRO};
+std::vector<Timing> song = {INTRO, VERSE, VERSE, BRIDGE, CHORUS, VERSE, VERSE2, PAUSE, BRIDGE2, INSTRUCTIONS, VERSE, INTRO, VERSE, VERSE, VERSE, BRIDGE3, CHORUS, OUTRO};
 std::vector<Timing> lyricized = {VERSE, VERSE2, BRIDGE, BRIDGE2, BRIDGE3, INSTRUCTIONS};
 
 void waitMeasures(unsigned int m, long offset) {
