@@ -22,6 +22,7 @@
 #include <locale>
 #include <codecvt>
 #include "text.h"
+#include "animations.h"
 #include "lyrics.h"
 #include "cursor.h"
 #include "utf8.h"
@@ -43,10 +44,11 @@ void loadWaves();
 void loadFrameWave();
 void loadFrameLowTide();
 void loadStars();
+void loadSparks();
 void lineSplit(std::string &s, unsigned int length);
 void printVideo();
 int printSMPExecuting(int thirtysecond, int &cursorRow, int &cursorCol);
-int updateSMP(int thirtysecond, int &cursorRow, int &cursorCol, std::vector<std::vector<bool>> &reverted, int &revertfrontRow, int &revertfrontCol);
+int updateSMP(int thirtysecond, int &cursorRow, int &cursorCol, std::vector<std::vector<bool>> &unsettledBool, int &revertfrontRow, int &revertfrontCol);
 int printSMP(int thirtysecond, int &cursorRow, int &cursorCol);
 int updateLyrics(int thirtysecond, int &timingIndex, int &durationIndex, int &sixteenthOffset, int &lyricIndex, int &cursorDisplayRow, int &cursorDisplayCol);
 int printLyrics(int thirtysecond, int &cursorRow, int &cursorCol);
@@ -59,6 +61,9 @@ int updateWaves(int thirtysecond, int &cursorRow, int &cursorCol, char fillChar,
 int printWaves(int thirtysecond, int &cursorRow, int &cursorCol, int dryLine);
 int printLowTide(int thirtysecond, int &cursorRow, int &cursorCol);
 int printStars(int thirtysecond, int &cursorRow, int &cursorCol, std::vector<std::pair<int, int>> &starCoordinates);
+int updatePVZ(int thirtysecond, int &cursorRow, int &cursorCol);
+void resetTransitioned();
+int printSparks(int thirtysecond, int &cursorRow, int &cursorCol, int &sparkIndex);
 
 
 int main(void)
@@ -71,6 +76,7 @@ int main(void)
     loadLyrics();
     loadWaves();
     loadStars();
+    loadSparks();
     loadFrameWave();
     loadFrameLowTide();
     printVideo();
@@ -147,8 +153,10 @@ void clearLyrics() {
 }
 
 void loadSMP() {
+    std::vector<bool> falses(SMP_WIDTH, false);
     for (int row=SMP_Y0; row < SMP_HEIGHT; ++row) {
         smp.push_back("");
+        transitioned.push_back(falses);
     }
 }
 
@@ -156,7 +164,7 @@ void loadSMPRowOffset() {
     SMP_Y0 = std::ceil((double)executing.length()/SMP_WIDTH) + 1;
     LOGO_Y0 = (SMP_HEIGHT-SMP_Y0-LOGO_HEIGHT) / 2;
     SMP_M1 = SMP_WIDTH*(SMP_HEIGHT-SMP_Y0) + SMP_M0;
-    LAST_BAR_M0 = std::floor((double)(LOW_TIDE_T0+LYRIC_AREA+SMP_Y0*SMP_WIDTH-SMP_M0)/31);
+    LAST_BAR_M0 = std::floor((double)(LOW_TIDE_T0+LYRIC_AREA+SMP_Y0*SMP_WIDTH-SMP_M0-1)/31);
     REVERT_PER_THIRTYSECOND = std::ceil((double)(LAST_BAR_M0-SMP_M0+1)/REVERT_THIRTYSECOND_COUNT);
     //std::cout << "smp row offset: " << std::to_string(SMP_ROW_OFFSET) << std::endl;
 }
@@ -180,10 +188,10 @@ void loadReverted() {
             for (int col=0; col < SMP_WIDTH-LOGO_Y0-LOGO_WIDTH; ++col) {
                 vrow.push_back(false);
             }
-            reverted.push_back(vrow);
+            REVERTED.push_back(vrow);
         }
         else {
-            reverted.push_back(std::vector<bool>(SMP_WIDTH, false));
+            REVERTED.push_back(std::vector<bool>(SMP_WIDTH, false));
         }
     }
 }
@@ -276,7 +284,7 @@ void loadFrameLowTide() {
                     s = "\033[7m" + s + "\033[0m";
                 }
             }
-            else if (measure >= 0 && measure <= LAST_BAR_M0-SMP_M0) {
+            else if (measure >= 0 && measure <= LAST_BAR_M0-SMP_M0-1) {
                 s = "_";
             }
             vrow.push_back(s);
@@ -286,10 +294,11 @@ void loadFrameLowTide() {
 }
 
 void loadStars() {
-    std::string empty(STAR_WIDTH, ' ');
-    for (int row=0; row < STAR_HEIGHT; ++row) {
-        stars.push_back(empty);
-    }
+    stars = std::vector<std::string>(STAR_HEIGHT, std::string(STAR_WIDTH, ' '));
+}
+
+void loadSparks() {
+    sparks = std::vector<std::string>(SPARK_HEIGHT, std::string(SPARK_WIDTH, ' '));
 }
 
 void lineSplit(std::string &s, unsigned int length) {
@@ -306,6 +315,8 @@ void printVideo() {
     int cursorRow=0, cursorCol=0;
     //SMP
     int revertfrontRow=0, revertfrontCol=0;
+    //std::vector<std::pair<int, int>> unsettled; //smpRow, smpCol
+    std::vector<std::vector<bool>> unsettledBool(LOGO_HEIGHT, std::vector<bool>(LOGO_WIDTH, false));
     //lyrics
     int cursorDisplayRow=2, cursorDisplayCol=0;
     int timingIndex=0, durationIndex=0, sixteenthOffset=0, lyricIndex=-1;
@@ -316,13 +327,16 @@ void printVideo() {
     std::vector<int> edgeFillWidths(WINDOW_HEIGHT, 0);
     //stars
     std::vector<std::pair<int, int>> starCoordinates; //row, col
+    //sparks
+    int sparkIndex = 0;
 
     int maxTotalDelay=0, slowestThirtysecond=0;
     for (int thirtysecond=0; thirtysecond < SONG_THIRTYSECOND_COUNT; ++thirtysecond) {
         int total_delay = TIMER_DELAY;
         //total_delay += FUNCTION_DELAY + clearWindow(cursorRow, cursorCol);
         total_delay += FUNCTION_DELAY + printSMPExecuting(thirtysecond, cursorRow, cursorCol);
-        total_delay += FUNCTION_DELAY + updateSMP(thirtysecond, cursorRow, cursorCol, reverted, revertfrontRow, revertfrontCol);
+        total_delay += FUNCTION_DELAY + updateSMP(thirtysecond, cursorRow, cursorCol, unsettledBool, revertfrontRow, revertfrontCol);
+        total_delay += FUNCTION_DELAY + updatePVZ(thirtysecond, cursorRow, cursorCol);
         total_delay += FUNCTION_DELAY + printSMP(thirtysecond, cursorRow, cursorCol);
         total_delay += FUNCTION_DELAY + updateLyrics(thirtysecond, timingIndex, durationIndex, sixteenthOffset, lyricIndex, cursorDisplayRow, cursorDisplayCol);
         total_delay += FUNCTION_DELAY + printLyrics(thirtysecond, cursorRow, cursorCol);
@@ -330,6 +344,7 @@ void printVideo() {
         total_delay += FUNCTION_DELAY + printWaves(thirtysecond, cursorRow, cursorCol, dryLine);
         total_delay += FUNCTION_DELAY + printLowTide(thirtysecond, cursorRow, cursorCol);
         total_delay += FUNCTION_DELAY + printStars(thirtysecond, cursorRow, cursorCol, starCoordinates);
+        total_delay += FUNCTION_DELAY + printSparks(thirtysecond, cursorRow, cursorCol, sparkIndex);
 
         //move cursor to lyric window
         //moveCursor(cursorRow, cursorCol, cursorDisplayRow, cursorDisplayCol);
@@ -385,38 +400,38 @@ int printSMPExecuting(int thirtysecond, int &cursorRow, int &cursorCol) {
             int measure = beat/4;
 
             //wobble 20, 24, 40
-            if (beat >= 641 && beat < 645) {
+            if (beat >= 733 && beat < 737) {
                 if (beat%2 == 1)    printSMPExecutingChar(1, 20, cursorRow, cursorCol);
                 else                printSMPExecutingChar(2, 20, cursorRow, cursorCol);
             }
-            if (beat >= 633 && beat < 637) {
+            if (beat >= 725 && beat < 729) {
                 if (beat%2 == 1)    printSMPExecutingChar(1, 24, cursorRow, cursorCol);
                 else                printSMPExecutingChar(2, 24, cursorRow, cursorCol);
             }
-            if (beat >= 621 && beat < 625) {
+            if (beat >= 713 && beat < 717) {
                 if (beat%2 == 1)    printSMPExecutingChar(1, 40, cursorRow, cursorCol);
                 else                printSMPExecutingChar(2, 40, cursorRow, cursorCol);
             }
 
             //beat following
-            if (measure == PAUSE_M0 || (thirtysecond >= WASHED_T0 && measure < VERSE6_M0)) { //index 30
+            if (/*measure == PAUSE_M0 ||*/ (thirtysecond >= WASHED_T0 && measure < VERSE6_M0)) { //index 30
                 printSMPExecutingChar(beat+3, 30, cursorRow, cursorCol);
             }
             if (measure != PAUSE_M0) {
                 std::vector<int> beatIndices;
-                if ((beat >= 225 && thirtysecond < WASHED_T0) || (beat >= 645 && beat <= 881)) { //index 20, m52
+                if ((beat >= 225 && thirtysecond < WASHED_T0) || (beat >= 737 && beat <= 881)) { //index 20, m52
                     beatIndices.push_back(20);
                 }
-                if ((beat >= 209 && thirtysecond < WASHED_T0) || (beat >= 637 && beat <= 885)) { //index 24, m48
+                if ((beat >= 209 && thirtysecond < WASHED_T0) || (beat >= 729 && beat <= 885)) { //index 24, m48
                     beatIndices.push_back(24);
                 }
-                if ((beat >= 193 && thirtysecond < WASHED_T0) || (beat >= 629 && beat <= 889)) { //index 34, m44
+                if ((beat >= 193 && thirtysecond < WASHED_T0) || (beat >= 721 && beat <= 889)) { //index 34, m44
                     beatIndices.push_back(34);
                 }
-                if ((beat >= 177 && thirtysecond < WASHED_T0) || (beat >= 625 && beat <= 893)) { //index 40, m40
+                if ((beat >= 177 && thirtysecond < WASHED_T0) || (beat >= 717 && beat <= 893)) { //index 40, m40
                     beatIndices.push_back(40);
                 }
-                if ((beat >= 161 && thirtysecond < WASHED_T0) || (beat >= 617 && beat <= 897)) { //index 46, m36
+                if ((beat >= 161 && thirtysecond < WASHED_T0) || (beat >= 709 && beat <= 897)) { //index 46, m36
                     beatIndices.push_back(46);
                 }
 
@@ -451,12 +466,19 @@ int printSMPExecuting(int thirtysecond, int &cursorRow, int &cursorCol) {
 }
 
 //return total_delay in ns
-int updateSMP(int thirtysecond, int &cursorRow, int &cursorCol, std::vector<std::vector<bool>> &reverted, int &revertfrontRow, int &revertfrontCol) {
+int updateSMP(int thirtysecond, int &cursorRow, int &cursorCol, std::vector<std::vector<bool>> &unsettledBool, int &revertfrontRow, int &revertfrontCol) {
     auto startTime = std::chrono::steady_clock::now();
 
+    //if (thirtysecond%8 == 0)
     int beat = thirtysecond/8;
+    int mainBeatIndex = beat%4;
     int measure = beat/4;
     bool flattened = (thirtysecond >= LOW_TIDE_T0+LYRIC_AREA && measure < VERSE6_M0) ? true : false;
+
+    //reset transitioned
+    if (thirtysecond == PVZ_TRANSITION_T0 || thirtysecond == SMP_TRANSITION_T0) {
+        resetTransitioned();
+    }
 
     //update reverted
     if (flattened) {
@@ -467,22 +489,22 @@ int updateSMP(int thirtysecond, int &cursorRow, int &cursorCol, std::vector<std:
                 int measureIndex = rand()%(LAST_BAR_M0-SMP_M0+1);
                 int row = measureIndex/SMP_WIDTH;
                 int col = measureIndex - row*SMP_WIDTH;
-                if (!reverted[row][col]) {
-                    reverted[row][col] = true;
+                if (!REVERTED[row][col]) {
+                    REVERTED[row][col] = true;
                     --revertCount;
                 }
             }
         }
 
         //verse5, revert 3-10 random chars per downbeat
-        if (thirtysecond%32 == 0 && measure >= VERSE5_M0 && measure < INTRO2_M0) {
-            int revertCount = kickRevertCounts[measure-VERSE5_M0];
+        if ((thirtysecond%32 == 0 && measure >= VERSE5_M0 && measure < INTRO2_M0 && measure != FAT_CLAP_M0+1) || thirtysecond == FAT_CLAP_T0) {
+            int revertCount = KICK_REVERT_COUNTS[measure-VERSE5_M0];
             while (revertCount != 0) {
                 int measureIndex = rand()%(LAST_BAR_M0-SMP_M0+1);
                 int row = measureIndex/SMP_WIDTH;
                 int col = measureIndex - row*SMP_WIDTH;
-                if (!reverted[row][col]) {
-                    reverted[row][col] = true;
+                if (!REVERTED[row][col]) {
+                    REVERTED[row][col] = true;
                     --revertCount;
                 }
             }
@@ -492,14 +514,14 @@ int updateSMP(int thirtysecond, int &cursorRow, int &cursorCol, std::vector<std:
         if (measure > LAST_BAR_M0 /*&& measure < SMP_M1*/) {
             int row = (measure-SMP_M0)/SMP_WIDTH;
             int col = measure-SMP_M0-row*SMP_WIDTH;
-            reverted[row][col] = true;
+            REVERTED[row][col] = true;
         }
 
         //end of intro2, revert all
         if (thirtysecond >= REVERT_T0) {
             int revertCount = 0;
             while (revertfrontRow < SMP_HEIGHT-SMP_Y0 && revertCount < REVERT_PER_THIRTYSECOND) {
-                reverted[revertfrontRow][revertfrontCol] = true;
+                REVERTED[revertfrontRow][revertfrontCol] = true;
                 ++revertCount;
                 
                 ++revertfrontCol;
@@ -512,7 +534,7 @@ int updateSMP(int thirtysecond, int &cursorRow, int &cursorCol, std::vector<std:
     }
 
     //update smp
-    if (measure >= SMP_M0 && (measure < SMP_M1 || (measure == SMP_M1 && beat%4 == 0)) && measure != PAUSE_M0) {
+    if (measure >= SMP_M0 && (measure < SMP_M1+1 || (measure == SMP_M1+1 && beat%4 == 0)) && measure != PAUSE_M0) {
         int charCount = measure - SMP_M0 + 1;
         if (measure > PAUSE_M0) {
             --charCount;
@@ -521,20 +543,43 @@ int updateSMP(int thirtysecond, int &cursorRow, int &cursorCol, std::vector<std:
         int col = 0;
         std::string srow;
         while (charCount != 0) {
-            if (flattened && !reverted[row][col]) {
+            if (flattened && !REVERTED[row][col]) {
                 srow += '_';
             }
             else if (row >= LOGO_Y0 && row < LOGO_Y0+LOGO_HEIGHT && col >= LOGO_X0 && col < LOGO_X0+LOGO_WIDTH) {
-                char c = SMP[row-LOGO_Y0][col-LOGO_X0];
-                if (c != ' ') {
-                    srow += c;
+                int logoRow = row - LOGO_Y0;
+                int logoCol = col - LOGO_X0;
+                bool isSMPChar = SMP[logoRow][logoCol] != ' ';
+                bool isPVZChar = PVZ[logoRow][logoCol] != ' ';
+                bool isTransitionChar = isSMPChar || isPVZChar;
+
+                if ((measure >= VERSE8_M0-1 && measure <= BRIDGE3_M0+1) && !transitioned[row][col] && isTransitionChar) {
+                    srow += smp[row][col];
                 }
                 else {
-                    srow += animationLOGO[beat%4];
+                    char c = (measure >= VERSE8_M0-1 && measure < BRIDGE3_M0) ? PVZ[logoRow][logoCol] : SMP[logoRow][logoCol];
+
+                    //update unsettled
+                    if (isSMPChar) {
+                        if (charCount == 1 && mainBeatIndex == 0) { //follow beat
+                            unsettledBool[logoRow][logoCol] = true;
+                        }
+                        if (beatIndex(animationLogo[mainBeatIndex]) == beatIndex(SMP[logoRow][logoCol])) { //settle
+                            unsettledBool[logoRow][logoCol] = false;
+                        }
+                    }
+
+                    //add char
+                    if (c == ' ' || unsettledBool[logoRow][logoCol]) {
+                        srow += animationLogo[mainBeatIndex];
+                    }
+                    else {
+                        srow += c;
+                    }
                 }
             }
             else if (row < SMP_HEIGHT-SMP_Y0) {
-                srow += animationLOGO[beat%4];
+                srow += animationLogo[mainBeatIndex];
             }
 
             ++col;
@@ -880,4 +925,61 @@ int printStars(int thirtysecond, int &cursorRow, int &cursorCol, std::vector<std
     auto endTime = std::chrono::steady_clock::now();
     auto timeNS = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime - startTime);
     return (int)timeNS.count();
+}
+
+//assumes both SMP and PVZ entirely visible, and
+//from VERSE8_M0-1 to BRIDGE3_M0+1 inclusive, updateSMP doesn't change transition chars until transitioned, and
+//from VERSE8_M0-1 to BRIDGE3_M0-1 inclusive, updateSMP uses PVZ
+int updatePVZ(int thirtysecond, int &cursorRow, int &cursorCol) {
+    auto startTime = std::chrono::steady_clock::now();
+
+    if (thirtysecond%8 == 0) {
+        int beat = thirtysecond/8;
+        int measure = beat/4;
+        int mainBeatIndex = beat%4;
+        if (measure == VERSE8_M0-1 || measure == VERSE8_M0) { //transition to pvz
+            advanceLogo(mainBeatIndex, PVZ);
+        }
+        else if (measure == BRIDGE3_M0 || measure == BRIDGE3_M0+1) { //transition back to smp
+            advanceLogo(mainBeatIndex, SMP);
+        }
+    }
+
+    auto endTime = std::chrono::steady_clock::now();
+    auto timeNS = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime - startTime);
+    return (int)timeNS.count();
+}
+
+void resetTransitioned() {
+    transitioned = std::vector<std::vector<bool>>(SMP_HEIGHT-SMP_Y0, std::vector<bool>(SMP_WIDTH, false));
+}
+
+int printSparks(int thirtysecond, int &cursorRow, int &cursorCol, int &sparkIndex) {
+    auto startTime = std::chrono::steady_clock::now();
+
+    if (sparkIndex < SPARKS_DT.size() && thirtysecond == SPARK_T0+SPARKS_DT[sparkIndex]) {
+
+        ++sparkIndex;
+    }
+
+    auto endTime = std::chrono::steady_clock::now();
+    auto timeNS = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime - startTime);
+    return (int)timeNS.count();
+}
+
+//update sparks and particles
+void generateSparkBase(std::vector<std::tuple<double, double, double, double>> &particles, int xCenter, int baseWidth, int particleCount, double dxMax, double dyMax) {
+    particles.clear();
+
+    int x0 = xCenter - (baseWidth-1)/2;
+    int x1 = xCenter + baseWidth/2;
+    std::string base(x0, ' ');
+    for (int particleItr=0; particleItr < particleCount; ++particleItr) {
+        double x, y=0, dx, dy;
+        if ()
+    }
+}
+
+void advanceSparkBase(std::vector<std::tuple<double, double, double, double>> &particles, double muAir, double gravity) {
+
 }

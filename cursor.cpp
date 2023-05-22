@@ -15,7 +15,7 @@ void printSMPExecutingChar(int beat, int charIndex, int &cursorRow, int &cursorC
 //cout is much slower than string construction; avoid single-char prints if possible
 void printAnimationChar(int beat, int &cursorRow, int &cursorCol, int x, int y) {
     unsigned int beatIndex = (unsigned)beat%4;
-    char c = animationLOGO[beatIndex];
+    char c = animationLogo[beatIndex];
     printChar(c, cursorRow, cursorCol, x, y);
 }
 

@@ -130,12 +130,12 @@ void printSMP() {
     int cursorRow = 0, cursorCol = 0;
     bool drawSMP = true;
     while (measure <= SMP_MEASURE_COUNT) {
-        for (unsigned int beat=0; beat < animationLOGO.length(); ++beat) {
+        for (unsigned int beat=0; beat < animationLogo.length(); ++beat) {
             //find runtime
             auto startTime = std::chrono::steady_clock::now();
 
             // find string
-            char bar = animationLOGO[beat];
+            char bar = animationLogo[beat];
             unsigned int lengthIncludingNewlines = measure + (measure-1)/SMP_WIDTH;
             std::string s = "";
             if (drawSMP) {
@@ -524,4 +524,45 @@ int printWaves(int thirtysecond, int &cursorRow, int &cursorCol, char fillChar, 
             visibleWave += fill;
         }
         visibleWave += substrU8(frameWave, startVisibleIndex, WAVE_LENGTH-startVisibleIndex);
+*/
+
+        //updateSMP(), settle logo chars to SMP
+        /*
+        for (int settleItr=unsettled.size()-1; settleItr >= 0; --settleItr) {
+            std::pair<int, int> coordinate = unsettled[settleItr];
+            int smpRow = coordinate.first, smpCol = coordinate.second;
+            if (beatIndex(smp[smpRow][smpCol]) == beatIndex(SMP[smpRow-LOGO_Y0][smpCol-LOGO_X0])) {
+                smp[smpRow][smpCol] = SMP[smpRow-LOGO_Y0][smpCol-LOGO_X0];
+                unsettled.erase(unsettled.begin()+settleItr);
+                unsettledBool[smpRow-LOGO_Y0][smpCol-LOGO_X0] = false;
+            }
+        }*/
+
+//advanceLogoChar(), casework
+/*
+    if (startLogo[logoRow][logoCol] != ' ' && endLogo[logoRow][logoCol] != ' ' && smp[smpRow][smpCol] != endLogo[logoRow][logoCol]) { //'*'->'*'
+        if ((beatIndex(endLogo[logoRow][logoCol])-beatIndex(smp[smpRow][smpCol])+4)%4 == 1) { //match beat while transitioning
+            smp[smpRow][smpCol] = nextBeatChar(smp[smpRow][smpCol]);
+            if (endLogo[logoRow][logoCol] == '_' && smp[smpRow][smpCol] == '-') { //underscore exception
+                smp[smpRow][smpCol] = '_';
+            }
+            transitioned[smpRow][smpCol] = true;
+        }
+    }
+    else if (startLogo[logoRow][logoCol] == ' ' && endLogo[logoRow][logoCol] != ' ' && smp[smpRow][smpCol] != endLogo[logoRow][logoCol]) { //' '->'*'
+        smp[smpRow][smpCol] = nextBeatChar(smp[smpRow][smpCol]);
+        if (endLogo[logoRow][logoCol] == '_' && smp[smpRow][smpCol] == '-') { //underscore exception
+            smp[smpRow][smpCol] = '_';
+        }
+        if (smp[smpRow][smpCol] == endLogo[logoRow][logoCol]) {
+            transitioned[smpRow][smpCol] = true;
+        }
+    }
+    else if (startLogo[logoRow][logoCol] != ' ' && endLogo[logoRow][logoCol] == ' ') { //'*'->' '
+        int i = (mainBeatIndex-beatIndex(smp[smpRow][smpCol])+4)%4;
+        if ((mainBeatIndex-beatIndex(smp[smpRow][smpCol])+4)%4 == 1) {
+            smp[smpRow][smpCol] = nextBeatChar(smp[smpRow][smpCol]);
+            transitioned[smpRow][smpCol] = true;
+        }
+    }
 */

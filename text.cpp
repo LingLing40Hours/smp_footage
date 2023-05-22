@@ -1,23 +1,19 @@
+/*
+Also globals but text-related
+*/
 #include "text.h"
-//_____  _   _  _____
-//|      |\ /|  |   |
-//|____  | - |  |___|
-//    |  |   |  |
-//____|  |   |  |
 
-//_____  _   _  _____
-//|   |   \ /    ///
-//|___|    -    //__
-//|
-//|___
+
 std::string executing = " *  Executing task: /bin/bash -c ./build/Debug/outDebug";
-std::string animationLOGO = "|/-\\";
+std::string animationLogo = "|/-\\";
 std::string waveChars = "゜つロabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ`~1!2@3#4$5%6^7&8*9(0)-_=+[{]}\\|;:'\",<.>/?¡™£¢∞§¶•ªº–≠œ∑´®†¥¨ˆøπ“‘«åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷";
 std::string bbgb = "( ゜- ゜)つロ"; //゜つロ
 std::vector<std::string> smp;
+std::vector<std::vector<bool>> transitioned;
 std::vector<std::string> lyrics;
 std::vector<std::string> waves;
 std::vector<std::string> stars;
+std::vector<std::string> sparks;
 std::vector<int> waveWidths;
 std::vector<int> waveLengths;
 std::vector<std::string> animationWaves = {
@@ -40,6 +36,17 @@ std::vector<std::string> animationTests = {
     "||||||||||||////||aaaaaaaaaaaa||\\\\\\\\||||||||||||",
     "||||||||||||////||aaaaaaaaaaaa||\\\\\\\\||||||||||||"
 };
+//_____  _   _  _____
+//|      |\ /|  |   |
+//|____  | - |  |___|
+//    |  |   |  |
+//____|  |   |  |
+
+//_____  _   _  _____
+//|   |   \ /    ///
+//|___|    -    ///__
+//|
+//|
 char SMP[5][19] = {
     {'_', '_', '_', '_', '_', ' ', ' ', '_', ' ', ' ', ' ', '_', ' ', ' ', '_', '_', '_', '_', '_'},
     {'|', ' ', ' ', ' ', ' ', ' ', ' ', '|', '\\', ' ', '/', '|', ' ', ' ', '|', ' ', ' ', ' ', '|'},
@@ -49,10 +56,10 @@ char SMP[5][19] = {
 };
 char PVZ[5][19] = {
     {'_', '_', '_', '_', '_', ' ', ' ', '_', ' ', ' ', ' ', '_', ' ', ' ', '_', '_', '_', '_', '_'},
-    {'|', ' ', ' ', ' ', '|', ' ', ' ', ' ', '\\', ' ', '/', ' ', ' ', ' ', '|', ' ', ' ', ' ', '|'},
-    {'|', '_', '_', '_', '|', ' ', ' ', ' ', ' ', '-', ' ', ' ', ' ', ' ', '|', '_', '_', '_', '|'},
+    {'|', ' ', ' ', ' ', '|', ' ', ' ', ' ', '\\', ' ', '/', ' ', ' ', ' ', ' ', '/', '/', '/', ' '},
+    {'|', '_', '_', '_', '|', ' ', ' ', ' ', ' ', '-', ' ', ' ', ' ', ' ', '/', '/', '/', '_', '_'},
     {'|', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-    {'|', '_', '_', '_', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
+    {'|', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
 };
 std::string frameSMP = "";
 std::string framePVZ = "";

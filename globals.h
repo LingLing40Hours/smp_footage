@@ -1,6 +1,9 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
+#include <iostream>
+#include <codecvt>
+
 #define BPM 128
 #define MPW 6
 #define BPW 24
@@ -9,7 +12,7 @@
 #define NSPE (NSPB/2)
 #define NSPS (NSPB/4)
 #define NSPT (NSPB/8)
-#define TIMER_DELAY 74700
+#define TIMER_DELAY 67000
 #define FUNCTION_DELAY 2
 
 #define SONG_MEASURE_COUNT 226
@@ -17,13 +20,17 @@
 #define SONG_SIXTEENTH_COUNT 3616
 #define SONG_THIRTYSECOND_COUNT 7232
 
-#define SMP_M0 32
 #define PAUSE_M0 80
 #define VERSE5_M0 137
 #define INTRO2_M0 (VERSE5_M0+8)
 #define VERSE6_M0 (VERSE5_M0+16)
 #define REVERT_THIRTYSECOND_COUNT 16
 #define REVERT_T0 (VERSE6_M0*32-REVERT_THIRTYSECOND_COUNT)
+#define VERSE8_M0 (VERSE5_M0+32)
+#define BRIDGE3_M0 (VERSE5_M0+40)
+#define CHORUS_M0 32
+#define CHORUS2_M0 (VERSE5_M0+48)
+#define SMP_M0 CHORUS_M0
 
 #define SHALLOW_MEASURE_COUNT 28
 #define DEEP_MEASURE_COUNT 20
@@ -41,6 +48,10 @@
 #define LOW_TIDE_S0 (WAVE_S0+WAVE_SIXTEENTH_COUNT)
 #define LOW_TIDE_T0 (WAVE_T0+WAVE_THIRTYSECOND_COUNT)
 #define WASHED_T0 (WAVE_T0+LYRIC_AREA+SMP_AREA)
+#define PVZ_TRANSITION_T0 ((VERSE8_M0-1)*32)
+#define SMP_TRANSITION_T0 (BRIDGE3_M0*32)
+#define FAT_CLAP_M0 (VERSE5_M0+3)
+#define FAT_CLAP_T0 ((FAT_CLAP_M0*4+3)*8)
 
 #define WAVE_COUNT (WAVE_MEASURE_COUNT/MPW)
 #define NTE_WIDTH 48
@@ -62,9 +73,12 @@
 #define STAR_HEIGHT LYRIC_HEIGHT
 #define STAR_AREA (STAR_WIDTH*STAR_HEIGHT)
 #define EQUILIBRIUM_STAR_COUNT 18
+#define SPARK_M0 INTRO2_M0
+#define SPARK_T0 (SPARK_M0*32)
+#define SPARK_X0 40
+#define SPARK_WIDTH (LYRIC_WIDTH-SPARK_X0)
+#define SPARK_HEIGHT LYRIC_HEIGHT
 #define OUTRO_M0 (STAR_M0+16)
-
-#include <codecvt>
 
 /* Layout 1
 #define NTE_WIDTH 72
@@ -93,7 +107,8 @@ extern int SMP_M1;
 extern int LAST_BAR_M0;
 extern int REVERT_PER_THIRTYSECOND;
 extern int WAVE_LENGTH;
-extern std::vector<int> kickRevertCounts;
-extern std::vector<std::vector<bool>> reverted; //(SMP_HEIGHT-SMP_Y0, std::vector<bool>(SMP_WIDTH, false))
+extern std::vector<int> KICK_REVERT_COUNTS;
+extern std::vector<std::vector<bool>> REVERTED; //(SMP_HEIGHT-SMP_Y0, std::vector<bool>(SMP_WIDTH, false))
+extern std::vector<int> SPARKS_DT; //thirtyseconds after SPARK_T0
 
 #endif
