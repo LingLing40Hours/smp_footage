@@ -5,6 +5,8 @@
 #include <codecvt>
 
 #define BPM 128
+#define BPM2 120
+#define BPM3 112
 #define MPW 6
 #define BPW 24
 #define EPW 48
@@ -12,7 +14,9 @@
 #define NSPE (NSPB/2)
 #define NSPS (NSPB/4)
 #define NSPT (NSPB/8)
-#define TIMER_DELAY 67000
+#define NSPT2 (7500000000/BPM2)
+#define NSPT3 (7500000000/BPM3)
+#define TIMER_DELAY 53674 //49637 //44313 //64500
 #define FUNCTION_DELAY 2
 
 #define SONG_MEASURE_COUNT 226
@@ -79,6 +83,9 @@
 #define SPARK_WIDTH (LYRIC_WIDTH-SPARK_X0)
 #define SPARK_HEIGHT LYRIC_HEIGHT
 #define OUTRO_M0 (STAR_M0+16)
+#define OUTRO_T0 (OUTRO_M0*32)
+#define BPM2_T0 (OUTRO_T0-16)
+#define BPM3_T0 (OUTRO_T0-8)
 
 /* Layout 1
 #define NTE_WIDTH 72
@@ -107,6 +114,7 @@ extern int SMP_M1;
 extern int LAST_BAR_M0;
 extern int REVERT_PER_THIRTYSECOND;
 extern int WAVE_LENGTH;
+extern double SPARK_DIAGONAL;
 extern std::vector<int> KICK_REVERT_COUNTS;
 extern std::vector<std::vector<bool>> REVERTED; //(SMP_HEIGHT-SMP_Y0, std::vector<bool>(SMP_WIDTH, false))
 extern std::vector<int> SPARKS_DT; //thirtyseconds after SPARK_T0

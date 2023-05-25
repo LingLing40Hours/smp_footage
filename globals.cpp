@@ -19,6 +19,7 @@ int SMP_M1;
 int LAST_BAR_M0;
 int REVERT_PER_THIRTYSECOND;
 int WAVE_LENGTH;
+double SPARK_DIAGONAL = pow(SPARK_WIDTH*SPARK_WIDTH + SPARK_HEIGHT+SPARK_HEIGHT, 0.5);
 std::vector<int> KICK_REVERT_COUNTS = {3, 3, 4, 5, 6, 7, 8, 10};
 std::vector<std::vector<bool>> REVERTED;
 std::vector<int> SPARKS_DT = {0, 40, 72, 100, 136, 168, 190, 222};

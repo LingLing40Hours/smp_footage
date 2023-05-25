@@ -62,8 +62,12 @@ std::vector<std::string> lyricsAll = {
     "\nstart", " to", " dream", " about", " juggling", " walnut", "(s)", " at", " exactly", " 128", "n", "p", "m.", " You", " need", " not",
     "\nbe", " awake", " when", " performing", " this", " fix.", " Next,", " ensuring", " you", " \e[3mare\e[0m", " awake,", " run",
     "\nyour", " compiled", " program", " using", " Valgrind", " to", " remove", " any", " peaks", " over", " 0", "dB.",
-    "\nFinally,", " head", " to", " https://", "youtu.be/", "0BTVcEdnXnE,", " wait", " 426", "s,", " then", " click",
+    //https://youtu.be/KZ_SeW5ga-0
+    "\nFinally,", " head", " to", " https://", "youtu.be/", "KZ_SeW5ga-0,", " wait", " 428", "s,", " then", " click",
     "\nlike", " and", " subscribe.", " You", " have", " made", " use", " of", " the", " source", " monitor", " plus.",
+    //https://www.bilibili.com/video/BV1vk4y1x7BG
+    //"\nFinally,", " head", " to", " https://", "www.bilibili.com/", "video/", "BV1vk4y1x7BG,", " wait", " 428", "s,",
+    //"\nthen", " hold", " like", " for", " 3.1", "s.", " You", " have", " made", " use", " of", " the", " source", " monitor", " plus.",
     //verse
     "I", " am", " the", " source", " monitor", " plus",
     "\nI", " am", " the", " source", " monitor", " plus",

@@ -566,3 +566,73 @@ int printWaves(int thirtysecond, int &cursorRow, int &cursorCol, char fillChar, 
         }
     }
 */
+
+
+/*  //clearSparks profiling
+    std::vector<std::string> notclear(SPARK_HEIGHT, std::string(SPARK_WIDTH, ' '));
+    std::vector<std::tuple<double, double, double, double>> particles;
+    for (int row=0; row < SPARK_HEIGHT; ++row) {
+        for (int col=0; col < SPARK_WIDTH; ++col) {
+            if (rand()%8==1) {
+                notclear[row][col] = '*';
+                std::tuple<double, double, double, double> particle((double)col, (double)row, 0.0, 0.0);
+                particles.push_back(particle);
+            }
+        }
+    }
+
+    auto startTime = std::chrono::steady_clock::now();
+    for (int i=0; i < 10000000; ++i) {
+        sparks = notclear;
+        clearSparks1(particles);
+    }
+    auto endTime = std::chrono::steady_clock::now();
+    double timeSec = std::chrono::duration_cast<std::chrono::duration<double>>(endTime - startTime).count();
+    std::cout << std::fixed << "took " << timeSec << " seconds" << std::endl;
+
+    auto startTime2 = std::chrono::steady_clock::now();
+    for (int i=0; i < 10000000; ++i) {
+        sparks = notclear;
+        clearSparks2(particles);
+    }
+    auto endTime2 = std::chrono::steady_clock::now();
+    double timeSec2 = std::chrono::duration_cast<std::chrono::duration<double>>(endTime2 - startTime2).count();
+    std::cout << std::fixed << "took " << timeSec2 << " seconds" << std::endl;
+
+    auto startTime3 = std::chrono::steady_clock::now();
+    for (int i=0; i < 10000000; ++i) {
+        sparks = notclear;
+        clearSparks3(particles);
+    }
+    auto endTime3 = std::chrono::steady_clock::now();
+    double timeSec3 = std::chrono::duration_cast<std::chrono::duration<double>>(endTime3 - startTime3).count();
+    std::cout << std::fixed << "took " << timeSec3 << " seconds" << std::endl;
+    return 0;
+*/
+
+
+/*
+//remove parameter before using
+void clearSparks1(std::vector<std::tuple<double, double, double, double>> &particles) {
+    sparks = std::vector<std::string>(SPARK_HEIGHT, std::string(SPARK_WIDTH, ' '));
+}
+
+void clearSparks2(std::vector<std::tuple<double, double, double, double>> &particles) {
+    for (std::tuple<double, double, double, double> particle : particles) {
+        int x = std::round(std::get<0>(particle));
+        int y = std::round(std::get<1>(particle));
+        if (sparks[y][x] == '*') {
+            sparks[y][x] = ' ';
+        }
+    }
+}
+
+//fastest for relatively few particles
+void clearSparks3(std::vector<std::tuple<double, double, double, double>> &particles) {
+    for (std::tuple<double, double, double, double> particle : particles) {
+        int x = std::round(std::get<0>(particle));
+        int y = std::round(std::get<1>(particle));
+        sparks[y][x] = ' ';
+    }
+}
+*/

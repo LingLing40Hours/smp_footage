@@ -25,6 +25,7 @@ void waitBeats(unsigned int b, long offset);
 void wait8ths(unsigned int e, long offset);
 void wait16ths(unsigned int s, long offset);
 void wait32nds(unsigned int t, long offset);
+void waitNanosecs(unsigned int n);
 bool hasLyrics(Timing t);
 
 #endif

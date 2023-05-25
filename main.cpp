@@ -55,6 +55,7 @@ int printLyrics(int thirtysecond, int &cursorRow, int &cursorCol);
 void pushLyrics();
 std::string removeANSI(std::string s);
 int clearWindow(int &cursorRow, int &cursorCol);
+int findDurationNS(int thirtysecond, int &n);
 int updateMaxDelay(int thirtysecond, int &maxTotalDelay, int totalDelay, int &slowestThirtysecond);
 int genericFunction(int thirtysecond, int &cursorRow, int &cursorCol, int totalDelay);
 int updateWaves(int thirtysecond, int &cursorRow, int &cursorCol, char fillChar, int &startOutIndex, int &dryLine, std::vector<std::string> &edgeChars, std::vector<int> &edgeCharWidths, std::vector<int> &edgeFillWidths);
@@ -63,7 +64,9 @@ int printLowTide(int thirtysecond, int &cursorRow, int &cursorCol);
 int printStars(int thirtysecond, int &cursorRow, int &cursorCol, std::vector<std::pair<int, int>> &starCoordinates);
 int updatePVZ(int thirtysecond, int &cursorRow, int &cursorCol);
 void resetTransitioned();
-int printSparks(int thirtysecond, int &cursorRow, int &cursorCol, int &sparkIndex);
+int printSparks(int thirtysecond, int &cursorRow, int &cursorCol, std::vector<std::tuple<double, double, double, double>> &particles, int &sparkIndex, bool &sparking);
+void generateSparkBase(std::vector<std::tuple<double, double, double, double>> &particles, int xCenter, int baseWidth, int particleCount, double vxMax, double vyMax);
+void advanceSparks(std::vector<std::tuple<double, double, double, double>> &particles, int xCenter, int yMax, double muAir, double gravity);
 
 
 int main(void)
@@ -76,7 +79,6 @@ int main(void)
     loadLyrics();
     loadWaves();
     loadStars();
-    loadSparks();
     loadFrameWave();
     loadFrameLowTide();
     printVideo();
@@ -165,7 +167,7 @@ void loadSMPRowOffset() {
     LOGO_Y0 = (SMP_HEIGHT-SMP_Y0-LOGO_HEIGHT) / 2;
     SMP_M1 = SMP_WIDTH*(SMP_HEIGHT-SMP_Y0) + SMP_M0;
     LAST_BAR_M0 = std::floor((double)(LOW_TIDE_T0+LYRIC_AREA+SMP_Y0*SMP_WIDTH-SMP_M0-1)/31);
-    REVERT_PER_THIRTYSECOND = std::ceil((double)(LAST_BAR_M0-SMP_M0+1)/REVERT_THIRTYSECOND_COUNT);
+    REVERT_PER_THIRTYSECOND = std::ceil((double)(LAST_BAR_M0-SMP_M0)/REVERT_THIRTYSECOND_COUNT);
     //std::cout << "smp row offset: " << std::to_string(SMP_ROW_OFFSET) << std::endl;
 }
 
@@ -210,7 +212,7 @@ void loadFrameWave () {
     //frameWave += box;
 
     //random ascii
-    bool drunk = false;
+    //bool drunk = false;
     int colCount = 0;
     int waveCharLength = lengthU8(waveChars);
     while (colCount < WAVE_THIRTYSECOND_COUNT) {
@@ -219,12 +221,6 @@ void loadFrameWave () {
         if (colCount+width <= WAVE_THIRTYSECOND_COUNT) {
             frameWave += s;
             colCount += width;
-
-            //bbgb
-            if (s == "ロ" && colCount >= 13 && !drunk) {
-                overwriteColU8(frameWave, colCount-13, bbgb, U'*');
-                drunk = true;
-            }
         }
     }
 
@@ -243,6 +239,17 @@ void loadFrameWave () {
             std::string s = substrU8(waveChars, fillIndex, 1);
             char32_t fill = toChar(s);
             overwriteColU8(frameWave, colItr, "*", fill);
+        }
+    }
+
+    //bbgb
+    colCount = 0;
+    for (int charIndex=0; charIndex < frameWave.size(); ++charIndex) {
+        std::string s = substrU8(frameWave, charIndex, 1);
+        colCount += stringWidth(s);
+        if (s == "ロ" && colCount >= 13) {
+            overwriteColU8(frameWave, colCount-13, bbgb, U'*');
+            break;
         }
     }
 
@@ -329,6 +336,10 @@ void printVideo() {
     std::vector<std::pair<int, int>> starCoordinates; //row, col
     //sparks
     int sparkIndex = 0;
+    bool sparking = false;
+    std::vector<std::tuple<double, double, double, double>> particles;
+    //waiting
+    int durationNS = 0;
 
     int maxTotalDelay=0, slowestThirtysecond=0;
     for (int thirtysecond=0; thirtysecond < SONG_THIRTYSECOND_COUNT; ++thirtysecond) {
@@ -344,7 +355,7 @@ void printVideo() {
         total_delay += FUNCTION_DELAY + printWaves(thirtysecond, cursorRow, cursorCol, dryLine);
         total_delay += FUNCTION_DELAY + printLowTide(thirtysecond, cursorRow, cursorCol);
         total_delay += FUNCTION_DELAY + printStars(thirtysecond, cursorRow, cursorCol, starCoordinates);
-        total_delay += FUNCTION_DELAY + printSparks(thirtysecond, cursorRow, cursorCol, sparkIndex);
+        total_delay += FUNCTION_DELAY + printSparks(thirtysecond, cursorRow, cursorCol, particles, sparkIndex, sparking);
 
         //move cursor to lyric window
         //moveCursor(cursorRow, cursorCol, cursorDisplayRow, cursorDisplayCol);
@@ -354,16 +365,17 @@ void printVideo() {
 
         //wait
         total_delay += FUNCTION_DELAY + updateMaxDelay(thirtysecond, maxTotalDelay, total_delay, slowestThirtysecond);
-        wait32nds(1, total_delay);
+        total_delay += FUNCTION_DELAY + findDurationNS(thirtysecond, durationNS);
+        waitNanosecs(durationNS-total_delay);
     }
 
     //end
     std::string delayMessage = "max total delay: " + std::to_string(maxTotalDelay) + "ns at t=" + std::to_string(slowestThirtysecond) + "; ";
     if (maxTotalDelay < NSPT) {
-        delayMessage += "buffer is sufficient";
+        delayMessage += "no under-buffering";
     }
     else {
-        delayMessage += "under-buffering occurred";
+        delayMessage += "no! under-buffering!";
     }
     printMessage(delayMessage, cursorRow, cursorCol, 0, 0, delayMessage.length(), 0);
     moveCursor(cursorRow, cursorCol, 0, 1); //end here
@@ -486,7 +498,8 @@ int updateSMP(int thirtysecond, int &cursorRow, int &cursorCol, std::vector<std:
         if (thirtysecond%2 == 0 && measure >= INTRO2_M0 /*&& measure < VERSE6_M0*/) {
             int revertCount = rand()%34 - 32;
             while (revertCount > 0) {
-                int measureIndex = rand()%(LAST_BAR_M0-SMP_M0+1);
+                //note LAST_BAR_SMP_WINDOW_M0 = LAST_BAR_M0 - SMP_M0 - 1
+                int measureIndex = rand()%(LAST_BAR_M0-SMP_M0);
                 int row = measureIndex/SMP_WIDTH;
                 int col = measureIndex - row*SMP_WIDTH;
                 if (!REVERTED[row][col]) {
@@ -500,7 +513,7 @@ int updateSMP(int thirtysecond, int &cursorRow, int &cursorCol, std::vector<std:
         if ((thirtysecond%32 == 0 && measure >= VERSE5_M0 && measure < INTRO2_M0 && measure != FAT_CLAP_M0+1) || thirtysecond == FAT_CLAP_T0) {
             int revertCount = KICK_REVERT_COUNTS[measure-VERSE5_M0];
             while (revertCount != 0) {
-                int measureIndex = rand()%(LAST_BAR_M0-SMP_M0+1);
+                int measureIndex = rand()%(LAST_BAR_M0-SMP_M0);
                 int row = measureIndex/SMP_WIDTH;
                 int col = measureIndex - row*SMP_WIDTH;
                 if (!REVERTED[row][col]) {
@@ -512,8 +525,8 @@ int updateSMP(int thirtysecond, int &cursorRow, int &cursorCol, std::vector<std:
 
         //low tide, new measures are reverted
         if (measure > LAST_BAR_M0 /*&& measure < SMP_M1*/) {
-            int row = (measure-SMP_M0)/SMP_WIDTH;
-            int col = measure-SMP_M0-row*SMP_WIDTH;
+            int row = (measure-SMP_M0-1)/SMP_WIDTH;
+            int col = measure-SMP_M0-1-row*SMP_WIDTH;
             REVERTED[row][col] = true;
         }
 
@@ -725,6 +738,24 @@ int clearWindow(int &cursorRow, int &cursorCol) {
     return (int)timeNS.count();
 }
 
+int findDurationNS(int thirtysecond, int &n) {
+    auto startTime = std::chrono::steady_clock::now();
+
+    if (thirtysecond >= BPM2_T0 && thirtysecond < BPM3_T0) {
+        n = NSPT2;
+    }
+    else if (thirtysecond >= BPM3_T0 && thirtysecond < OUTRO_T0) {
+        n = NSPT3;
+    }
+    else {
+        n = NSPT;
+    }
+
+    auto endTime = std::chrono::steady_clock::now();
+    auto timeNS = std::chrono::duration_cast<std::chrono::nanoseconds>(endTime - startTime);
+    return (int)timeNS.count();
+}
+
 int updateMaxDelay(int thirtysecond, int &maxTotalDelay, int totalDelay, int &slowestThirtysecond) {
     auto startTime = std::chrono::steady_clock::now();
 
@@ -927,9 +958,8 @@ int printStars(int thirtysecond, int &cursorRow, int &cursorCol, std::vector<std
     return (int)timeNS.count();
 }
 
-//assumes both SMP and PVZ entirely visible, and
-//from VERSE8_M0-1 to BRIDGE3_M0+1 inclusive, updateSMP doesn't change transition chars until transitioned, and
-//from VERSE8_M0-1 to BRIDGE3_M0-1 inclusive, updateSMP uses PVZ
+//assumes from VERSE8_M0-1 to BRIDGE3_M0+1 inclusive, updateSMP doesn't change transition chars until transitioned, and
+//assumes from VERSE8_M0-1 to BRIDGE3_M0-1 inclusive, updateSMP uses PVZ
 int updatePVZ(int thirtysecond, int &cursorRow, int &cursorCol) {
     auto startTime = std::chrono::steady_clock::now();
 
@@ -954,12 +984,29 @@ void resetTransitioned() {
     transitioned = std::vector<std::vector<bool>>(SMP_HEIGHT-SMP_Y0, std::vector<bool>(SMP_WIDTH, false));
 }
 
-int printSparks(int thirtysecond, int &cursorRow, int &cursorCol, int &sparkIndex) {
+int printSparks(int thirtysecond, int &cursorRow, int &cursorCol, std::vector<std::tuple<double, double, double, double>> &particles, int &sparkIndex, bool &sparking) {
     auto startTime = std::chrono::steady_clock::now();
 
+    //update
     if (sparkIndex < SPARKS_DT.size() && thirtysecond == SPARK_T0+SPARKS_DT[sparkIndex]) {
-
+        generateSparkBase(particles, 18, 2+sparkIndex/3, 4+sparkIndex/3, 7.2, 3.2);
+        sparking = true;
         ++sparkIndex;
+    }
+    else if (sparking) {
+        advanceSparks(particles, 18, 5+sparkIndex/3, 0.5, 1.8);
+        if (particles.size() == 0) {
+            sparking = false;
+        }
+    }
+
+    //print
+    if (sparking) {
+        for (const std::tuple<double, double, double, double> &particle : particles) {
+            int x = std::round(std::get<0>(particle)) + SPARK_X0;
+            int y = std::round(std::get<1>(particle));
+            printChar('*', cursorRow, cursorCol, x, y);
+        }
     }
 
     auto endTime = std::chrono::steady_clock::now();
@@ -967,19 +1014,55 @@ int printSparks(int thirtysecond, int &cursorRow, int &cursorCol, int &sparkInde
     return (int)timeNS.count();
 }
 
-//update sparks and particles
-void generateSparkBase(std::vector<std::tuple<double, double, double, double>> &particles, int xCenter, int baseWidth, int particleCount, double dxMax, double dyMax) {
+//update sparks and particles, assuming sparks is empty
+void generateSparkBase(std::vector<std::tuple<double, double, double, double>> &particles, int xCenter, int baseWidth, int particleCount, double vxMax, double vyMax) {
+    //remove old particles
     particles.clear();
 
+    //add particles
     int x0 = xCenter - (baseWidth-1)/2;
     int x1 = xCenter + baseWidth/2;
-    std::string base(x0, ' ');
+    bool leftSpark = false, rightSpark = false;
     for (int particleItr=0; particleItr < particleCount; ++particleItr) {
-        double x, y=0, dx, dy;
-        if ()
+        double x;
+        if (!leftSpark) {
+            x = x0;
+            leftSpark = true;
+        }
+        else if (!rightSpark) {
+            x = x1;
+            rightSpark = true;
+        }
+        else {
+            x = rand()%(x1-x0+1) + x0;
+        }
+        double y = 0;
+        double vx = ((double)rand()/RAND_MAX*2-1)*vxMax;
+        double vy = (double)rand()/RAND_MAX*vyMax;
+        particles.push_back(std::tuple<double, double, double, double>(x, y, vx, vy));
     }
 }
 
-void advanceSparkBase(std::vector<std::tuple<double, double, double, double>> &particles, double muAir, double gravity) {
-
+void advanceSparks(std::vector<std::tuple<double, double, double, double>> &particles, int xCenter, int yMax, double muAir, double gravity) {
+    //do physics
+    for (int particleItr=particles.size()-1; particleItr >= 0; --particleItr) {
+        std::tuple<double, double, double, double> &particle = particles[particleItr];
+        //velocity
+        std::get<0>(particle) += std::get<2>(particle);
+        std::get<1>(particle) += std::get<3>(particle);
+        //acceleration
+        std::get<2>(particle) *= 1-muAir;
+        std::get<3>(particle) *= 1-muAir;
+        std::get<3>(particle) += gravity;
+        //print if in bounds else remove
+        //extinguish with probability roughly proportional to distance travelled
+        int x = std::round(std::get<0>(particle));
+        int y = std::round(std::get<1>(particle));
+        int dx = x - xCenter;
+        double pExtinguish = pow(dx*dx + y*y, 0.7)/SPARK_DIAGONAL/2.2;
+        double random = (double)rand()/RAND_MAX;
+        if (y > yMax || random < pExtinguish || x < 0 || x >= SPARK_WIDTH || y < 0 || y >= SPARK_HEIGHT) {
+            particles.erase(particles.begin()+particleItr);
+        }
+    }
 }

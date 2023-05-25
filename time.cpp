@@ -105,6 +105,12 @@ void wait32nds(unsigned int t, long offset) {
     while (std::chrono::steady_clock::now() < end);
 }
 
+void waitNanosecs(unsigned int n) {
+    auto start = std::chrono::steady_clock::now();
+    auto end = start + std::chrono::nanoseconds(n);
+    while (std::chrono::steady_clock::now() < end);
+}
+
 bool hasLyrics(Timing t) {
     for (int lyricizedItr=0; lyricizedItr < lyricized.size(); ++lyricizedItr) {
         if (t == lyricized[lyricizedItr]) {
