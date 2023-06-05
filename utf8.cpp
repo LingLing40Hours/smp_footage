@@ -47,7 +47,7 @@ void insertU8(std::string &s, unsigned int index, std::string stuff) {
 }
 
 //index and index+stuff must be in range
-void overwriteU8(std::string &s, unsigned int index, std::string stuff) {
+void overwriteIndexU8(std::string &s, unsigned int index, std::string stuff) {
     s = substrU8(s, 0, index) + stuff + substrU8(s, index+lengthU8(stuff), lengthU8(s)-index-lengthU8(stuff));
 }
 
